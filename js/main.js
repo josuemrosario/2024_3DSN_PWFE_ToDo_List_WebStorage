@@ -1,6 +1,12 @@
-window.addEventListener('load',()=>{
+let idAlterar = 0
+let maiorId = 0
+let alterar = false
 
-    let idTarefa = 1
+window.addEventListener('load',()=>{
+    
+    localStorage.clear()
+    let idTarefa = 0
+    
 
     btCadastrar = document.getElementById('btCadastrar')
     btLimpar = document.getElementById('btLimpar')
@@ -12,20 +18,33 @@ window.addEventListener('load',()=>{
 
     btnOK.addEventListener('click',()=>{
         
+
         // Cria chave no storage
         console.log('botao OK')
-        idTarefa = idTarefa + 1
-        tarefa = {'id':idTarefa, 'descricao':descricao.value,'local':local.value ,'horario':horario.value}
-        localStorage.setItem(idTarefa,JSON.stringify(tarefa))
 
-        // localStorage.setItem('descricao - '+idTarefa,descricao.value)
-        // localStorage.setItem('local - '+idTarefa,local.value)
-        // localStorage.setItem('horario - '+idTarefa,horario.value)
+        console.log('idAlterar: ',idAlterar)
 
+        if (idAlterar > 0) {
+
+            idTarefa = idAlterar
+            idAlterar = 0
+
+            // logica atualizar a linha da tabela 
+            linhaAlterar = document.getElementById("L" +idTarefa)
+            
+            console.log(linhaAlterar)
+
+        } else {
+            maiorId = maiorId + 1
+            idTarefa = maiorId
+                   
+        }
+        
+        
         // Atualizar Tabela
         var linha = document.createElement('tr')
-        linha.id = idTarefa
-
+        linha.id = "L" + idTarefa
+        
         var celulaid = document.createElement('th')
         celulaid.innerText = idTarefa
 
@@ -47,8 +66,25 @@ window.addEventListener('load',()=>{
         btnAlterar.classList.add('btn')
         btnAlterar.classList.add('btn-warning')
         btnAlterar.classList.add('me-1')
-        btnAlterar.addEventListener('click',()=>{
+        btnAlterar.addEventListener('click',(e)=>{
             console.log('logica de alterar')
+
+            alterar = true
+            //preencher valores
+            item = JSON.parse(localStorage.getItem(e.target.id))
+            console.log(item.descricao)
+
+            descricao.value = item.descricao
+            local.value = item.local
+            horario.value = item.horario
+            
+            console.log(e.target.id)
+            idAlterar = parseInt(e.target.id)
+
+            // Mostra o modal com valores preenchidos
+            var modtarefa = document.getElementById('tarefa')
+            var modal = new bootstrap.Modal(modtarefa)
+            modal.show()
         })
         celulaAcao.appendChild(btnAlterar)
 
@@ -64,19 +100,40 @@ window.addEventListener('load',()=>{
             linha.remove()
         })
         celulaAcao.appendChild(btnExcluir)
-       
+    
         linha.appendChild(celulaid)
         linha.appendChild(celulaTarefa)
         linha.appendChild(celulaLocal)
         linha.appendChild(celulaHorario)
         linha.appendChild(celulaAcao)
-        tblTarefa.appendChild(linha)
+        
+        if(alterar){
+            document.getElementById("L" + idTarefa).replaceWith(linha);
+            alterar = false
+        }else{  
+            tblTarefa.appendChild(linha)         
+        }
+        
+        tarefa = {'id':idTarefa, 'descricao':descricao.value,'local':local.value ,'horario':horario.value}
+        localStorage.setItem(idTarefa,JSON.stringify(tarefa))
+
+
+
+
+        
+        //limpa todos os campos
+        descricao.value = ''
+        local.value = ''
+        horario.value = ''
 
     })
 
     btLimpar.addEventListener('click',()=>{
         localStorage.clear()
     })
+
+
+
 
 
     
